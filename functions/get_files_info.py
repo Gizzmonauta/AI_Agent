@@ -22,15 +22,11 @@ def get_files_info(working_directory, directory="."):
         list_of_files = os.listdir(target_dir)
         results = []
         for filename in list_of_files:
-            print(f"Processing file: {filename}")
-            file_size = os.path.getsize(filename)
-            is_dir = os.path.isdir(filename)
-            results.append(f"- {filename}: file_size={file_size}, is_directory={is_dir}")
+            full_path = os.path.join(target_dir, filename)
+            file_size = os.path.getsize(full_path)
+            is_dir = os.path.isdir(full_path)
+            results.append(f"- {filename}: file_size={file_size} bytes, is_dir={is_dir}")
         return "\n".join(results)
 
     except Exception as e:
         return str(e)
-
-get_files_info("./calculator", "pkg")
-get_files_info("./calculator", "./function")
-get_files_info("./calculator", "../../function")
