@@ -11,7 +11,7 @@ schema_run_python_file = types.FunctionDeclaration(
         properties={
             "file_path": types.Schema(
                 type=types.Type.STRING,
-                description="File path to run, relative to the working directory (default is the working directory itself)",
+                description="File path to run, relative to the working directory",
             ),
             "args": types.Schema(
                 type=types.Type.ARRAY,
@@ -19,6 +19,7 @@ schema_run_python_file = types.FunctionDeclaration(
                 description="Optional arguments to pass to the Python file (default is no arguments)",
             ),
         },
+        required=["file_path"],
     ),
 )
 
@@ -51,18 +52,23 @@ def run_python_file(working_directory, file_path, args=None):
         # Use subprocess to run the Python file and capture output
         result = subprocess.run(command, cwd=working_dir_abs, capture_output=True, text=True, timeout=30)
         output_string = ""
+
+        # Add stdout and stderr if they exist
+        if result.stdout:
+            output_string += f"STDOUT: {result.stdout}\n"
+        if result.stderr:
+            output_string += f"STDERR: {result.stderr}\n"
+
+        # If no output at all
+        if not result.stdout and not result.stderr:
+            output_string += "No output produced\n"
+
+        # Add exit code if non-zero
         if result.returncode != 0:
             output_string += f"Process exited with code {result.returncode}\n"
-        elif not result.stdout and not result.stderr:
-            output_string += "No output produced" 
-        else:
-            output_string += f"STDOUT: {result.stdout}"
-            output_string += "\n"
-            output_string += f"STDERR: {result.stderr}"
 
-
+        return output_string
 
     except Exception as e:
         return f"{e}"
     
-    return output_string

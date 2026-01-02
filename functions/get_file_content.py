@@ -11,9 +11,10 @@ schema_get_file_content = types.FunctionDeclaration(
         properties={
             "file_path": types.Schema(
                 type=types.Type.STRING,
-                description="File path to read content from, relative to the working directory (default is the working directory itself)",
+                description="File path to read content from, relative to the working directory",
             ),
         },
+        required=["file_path"],
     ),
 )
 
@@ -36,15 +37,17 @@ def get_file_content(working_directory, file_path):
 
         # Read the file content up to MAX_CHARS
         with open(target_file, 'r') as f:
-            content = f.read(MAX_CHARS)
+            content = f.read(MAX_CHARS + 1)
         
             # After reading the first MAX_CHARS...
-            if f.read(1):
+            if len(content) > MAX_CHARS:
+                content = content[:MAX_CHARS]
                 content += f'[...File "{file_path}" truncated at {MAX_CHARS} characters]'
 
+        return content
 
     except Exception as e:
         return str(e)
     
-    return content
+
 
